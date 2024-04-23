@@ -1070,7 +1070,7 @@ class Nota:
 
 
 
-conexion = ConexionBD("Registro_De_Estudiantes", "postgres", "150503", "localhost")
+conexion = ConexionBD("Registro_De_Estudiantes", "postgres", "12345", "localhost")
 root = tk.Tk()
 app = LoginApp(root, conexion)
 root.mainloop()
