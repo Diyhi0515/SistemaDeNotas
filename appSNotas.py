@@ -240,9 +240,9 @@ class RegistroEstudianteApp:
         tk.Label(self.frame_notas, text="Ingrese las notas:").pack()
 
         tipos_notas = [
-            ("Practicos", "Practicos"),
+            ("Practicos", "Prácticos"),
             ("Control de Lectura", "Control de Lectura"),
-            ("Per parcialrim", "Per parcialrim"),
+            ("Primer parcial", "Primer Parcial"),
             ("Segundo Parcial", "Segundo Parcial"),
             ("Examen Final", "Examen Final")
         ]
