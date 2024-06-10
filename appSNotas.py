@@ -67,7 +67,7 @@ class LoginApp:
         resultado = self.conexion.ejecutar_consulta("SELECT contrasena FROM usuario WHERE nombre_user = %s", (usuario,))
 
         if resultado and resultado[0][0] == contrasena:
-            messagebox.showinfo("Inicio de sesión", "Inicio de sesión exitoso")
+            #messagebox.showinfo("Inicio de sesión", "Inicio de sesión exitoso")
             self.root.destroy()
             ventana_principal = tk.Tk()
             VentanaPrincipal(ventana_principal, conexion, Estudiante(), Materia(), Nota())
@@ -139,7 +139,8 @@ class VentanaPrincipal:
             nombre = ''.join(filter(str.isalpha, nombre))
             apellido_paterno = ''.join(filter(str.isalpha, apellidos[0] if apellidos else ""))
             apellido_materno = ''.join(filter(str.isalpha, apellidos[1] if len(apellidos) > 1 else ""))
-            self.clase_estudiante.eliminar_estudiante(self.conexion, nombre, apellido_paterno, apellido_materno)
+            id_estudiante = self.clase_estudiante.obtener_id_estudiante_por_nombre(self.conexion, nombre, apellido_paterno, apellido_materno)
+            self.clase_estudiante.eliminar_registro(self.conexion, id_estudiante)
             messagebox.showinfo("Estudiante eliminado", f"El estudiante {nombre_estudiante} ha sido eliminado")
         else:
             messagebox.showwarning("Advertencia", "Por favor, ingrese un nombre de estudiante válido")
@@ -875,13 +876,15 @@ class Estudiante:
 
     def eliminar_registro(self, conexion, id_estudiante):
         try:
-
-            codigos_materias = conexion.ejecutar_consulta("SELECT cod_materia FROM Notas WHERE id_estudiante=%s",
-                                                               (id_estudiante,))
-            for codigo_materia in codigos_materias:
-                conexion.ejecutar_actualizacion("DELETE FROM Nota WHERE id_e=%s AND cod_mat=%s",
-                                                     (id_estudiante, codigo_materia[0]))
-            conexion.ejecutar_actualizacion("DELETE FROM Notas WHERE id_estudiante=%s", (id_estudiante,))
+            tiene_notas = conexion.ejecutar_consulta("SELECT COUNT(*) FROM Notas WHERE id_estudiante=%s",
+                                                     (id_estudiante,))
+            if tiene_notas[0][0] > 0:
+                notas = conexion.ejecutar_consulta("SELECT id_e, cod_mat FROM Nota WHERE id_e=%s",
+                                                   (id_estudiante,))
+                for nota in notas:
+                    conexion.ejecutar_actualizacion("DELETE FROM Nota WHERE id_e=%s AND cod_mat=%s",
+                                                    (nota[0], nota[1]))
+                conexion.ejecutar_actualizacion("DELETE FROM Notas WHERE id_estudiante=%s", (id_estudiante,))
             conexion.ejecutar_actualizacion("DELETE FROM Estudiante WHERE id=%s", (id_estudiante,))
             messagebox.showinfo("Éxito", "Estudiante eliminado correctamente")
         except Exception as e:
@@ -1070,7 +1073,7 @@ class Nota:
 
 
 
-conexion = ConexionBD("Registro_De_Estudiantes", "postgres", "12345", "localhost")
+conexion = ConexionBD("Registro_De_Estudiantes", "postgres", "150503", "localhost")
 root = tk.Tk()
 app = LoginApp(root, conexion)
 root.mainloop()
